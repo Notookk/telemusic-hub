@@ -23,17 +23,27 @@ export const VoiceChat = ({ participants }: VoiceChatProps) => {
         {participants.map((participant) => (
           <div
             key={participant.id}
-            className="flex items-center space-x-3 p-2 rounded-md bg-white bg-opacity-5"
+            className="flex items-center space-x-3 p-2 rounded-md bg-white bg-opacity-5 hover:bg-opacity-10 transition-all"
           >
             {participant.avatar ? (
-              <img
-                src={participant.avatar}
-                alt={participant.name}
-                className="w-8 h-8 rounded-full"
-              />
+              <div className="relative">
+                <img
+                  src={participant.avatar}
+                  alt={participant.name}
+                  className="w-10 h-10 rounded-full transition-transform hover:scale-105"
+                />
+                {participant.isAdmin && (
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-player-accent rounded-full border-2 border-black" />
+                )}
+              </div>
             ) : (
-              <div className="w-8 h-8 rounded-full bg-player-accent bg-opacity-20 flex items-center justify-center">
-                <User size={16} className="text-player-accent" />
+              <div className="relative">
+                <div className="w-10 h-10 rounded-full bg-player-accent bg-opacity-20 flex items-center justify-center transition-transform hover:scale-105">
+                  <User size={16} className="text-player-accent" />
+                </div>
+                {participant.isAdmin && (
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-player-accent rounded-full border-2 border-black" />
+                )}
               </div>
             )}
             <div>

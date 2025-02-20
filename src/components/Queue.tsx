@@ -33,11 +33,18 @@ export const Queue = ({ tracks, currentTrackId, isAdmin, onSkip, onRemove }: Que
             )}
           >
             {track.thumbnail && (
-              <img
-                src={track.thumbnail}
-                alt={track.title}
-                className="w-16 h-16 rounded-md object-cover"
-              />
+              <div className="relative w-16 h-16 rounded-full overflow-hidden group transition-transform hover:scale-105">
+                <img
+                  src={track.thumbnail}
+                  alt={track.title}
+                  className="w-full h-full object-cover rounded-full transition-transform group-hover:scale-110"
+                />
+                {currentTrackId === track.id && (
+                  <div className="absolute inset-0 bg-player-accent bg-opacity-20 flex items-center justify-center rounded-full">
+                    <div className="w-3 h-3 bg-player-accent rounded-full animate-pulse" />
+                  </div>
+                )}
+              </div>
             )}
             <div className="flex-1 min-w-0">
               <p className="text-player-text text-sm font-medium truncate">

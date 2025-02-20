@@ -88,13 +88,18 @@ const Index = () => {
 
         {/* Current Track Thumbnail */}
         <div className="mb-8 animate-fade-in">
-          <div className="relative aspect-video md:aspect-[2.4/1] overflow-hidden rounded-xl">
+          <div className="relative aspect-square w-48 h-48 md:w-64 md:h-64 mx-auto rounded-full overflow-hidden group">
             <img
-              src="https://picsum.photos/1920/1080"
+              src="https://picsum.photos/800"
               alt="Current Track"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            {isPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-4 h-4 bg-player-accent rounded-full animate-pulse" />
+              </div>
+            )}
           </div>
         </div>
 
