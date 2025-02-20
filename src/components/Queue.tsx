@@ -1,5 +1,6 @@
 
 import { cn } from "@/lib/utils";
+import { Play, SkipForward, Trash2 } from "lucide-react";
 
 interface QueueTrack {
   id: string;
@@ -12,9 +13,12 @@ interface QueueTrack {
 interface QueueProps {
   tracks: QueueTrack[];
   currentTrackId?: string;
+  isAdmin: boolean;
+  onSkip?: (trackId: string) => void;
+  onRemove?: (trackId: string) => void;
 }
 
-export const Queue = ({ tracks, currentTrackId }: QueueProps) => {
+export const Queue = ({ tracks, currentTrackId, isAdmin, onSkip, onRemove }: QueueProps) => {
   return (
     <div className="bg-black bg-opacity-50 backdrop-blur-lg rounded-lg p-4">
       <h2 className="text-player-text text-lg font-semibold mb-4">Queue</h2>
@@ -32,7 +36,7 @@ export const Queue = ({ tracks, currentTrackId }: QueueProps) => {
               <img
                 src={track.thumbnail}
                 alt={track.title}
-                className="w-10 h-10 rounded object-cover"
+                className="w-16 h-16 rounded-md object-cover"
               />
             )}
             <div className="flex-1 min-w-0">
@@ -44,6 +48,22 @@ export const Queue = ({ tracks, currentTrackId }: QueueProps) => {
               </p>
             </div>
             <span className="text-player-muted text-xs">{track.duration}</span>
+            {isAdmin && currentTrackId !== track.id && (
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => onSkip?.(track.id)}
+                  className="p-2 text-player-muted hover:text-player-accent transition-colors"
+                >
+                  <SkipForward size={16} />
+                </button>
+                <button
+                  onClick={() => onRemove?.(track.id)}
+                  className="p-2 text-player-muted hover:text-red-500 transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
