@@ -1,32 +1,78 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MusicPlayer } from "@/components/MusicPlayer";
 import { Queue } from "@/components/Queue";
 import { VoiceChat } from "@/components/VoiceChat";
+import { useRoom } from "@/hooks/useRoom";
+import { useQueue } from "@/hooks/useQueue";
+import { useCurrentTrack } from "@/hooks/useCurrentTrack";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isAdmin] = useState(true); // This will come from your auth system
+  const { toast } = useToast();
+  
+  // For demo purposes, we're using a fixed room ID
+  const roomId = "example_group";
+  
+  const { room, isRoomLoading } = useRoom(roomId);
+  const { queue, isQueueLoading, removeFromQueue } = useQueue(roomId);
+  const { currentTrack, updateCurrentTrack } = useCurrentTrack(roomId);
 
-  // Mockup data - This will be replaced with real data from your Telegram bot
-  const mockupQueue = [
-    {
-      id: "1",
-      title: "Mockup Song 1",
-      artist: "Artist 1",
-      duration: "3:45",
-      thumbnail: "https://picsum.photos/400",
-    },
-    {
-      id: "2",
-      title: "Mockup Song 2",
-      artist: "Artist 2",
-      duration: "4:20",
-      thumbnail: "https://picsum.photos/400",
-    },
-  ];
+  const handlePlayPause = async () => {
+    if (!currentTrack) return;
+    
+    try {
+      await updateCurrentTrack.mutateAsync({
+        ...currentTrack,
+        is_playing: !currentTrack.is_playing,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update playback state",
+        variant: "destructive",
+      });
+    }
+  };
 
-  // Mockup participants data
+  const handleSkip = async (trackId: string) => {
+    if (!isAdmin) return;
+    
+    try {
+      await removeFromQueue.mutateAsync(trackId);
+      toast({
+        title: "Success",
+        description: "Track skipped successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to skip track",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRemove = async (trackId: string) => {
+    if (!isAdmin) return;
+    
+    try {
+      await removeFromQueue.mutateAsync(trackId);
+      toast({
+        title: "Success",
+        description: "Track removed from queue",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove track",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Mockup participants data (will be replaced with real data later)
   const mockupParticipants = [
     {
       id: "1",
@@ -48,18 +94,6 @@ const Index = () => {
     },
   ];
 
-  const handleSkip = (trackId: string) => {
-    if (isAdmin) {
-      console.log("Skipping track:", trackId);
-    }
-  };
-
-  const handleRemove = (trackId: string) => {
-    if (isAdmin) {
-      console.log("Removing track:", trackId);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/30 to-black text-white relative">
       {/* Background decoration */}
@@ -73,17 +107,17 @@ const Index = () => {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <span className="inline-block bg-player-accent bg-opacity-20 text-player-accent px-3 py-1 rounded-full text-sm mb-2 shadow-lg shadow-player-accent/20">
-                Active Session
+                {currentTrack?.is_playing ? "Now Playing" : "Paused"}
               </span>
               <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-white via-white to-white/70 bg-clip-text text-transparent">
-                Telegram Music Player
+                {room?.name || "Telegram Music Player"}
               </h1>
               <p className="text-player-muted">
-                Group ID: <span className="text-player-text">example_group</span>
+                Group ID: <span className="text-player-text">{roomId}</span>
               </p>
             </div>
             <a
-              href="https://t.me/your_bot?startgroup=example_group"
+              href={`https://t.me/your_bot?startgroup=${roomId}`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-player-accent hover:bg-opacity-90 text-black font-medium px-8 py-4 rounded-2xl transition-all transform hover:scale-105 hover:shadow-[0_0_30px_rgba(45,212,191,0.3)] active:scale-95 backdrop-blur-sm"
@@ -98,12 +132,12 @@ const Index = () => {
           <div className="relative aspect-square w-56 h-56 md:w-72 md:h-72 mx-auto rounded-full overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-t from-player-accent/20 to-transparent opacity-50" />
             <img
-              src="https://picsum.photos/800"
-              alt="Current Track"
+              src={currentTrack?.thumbnail || "https://picsum.photos/800"}
+              alt={currentTrack?.title || "No track playing"}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            {isPlaying && (
+            {currentTrack?.is_playing && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-5 h-5 bg-player-accent rounded-full animate-pulse shadow-[0_0_30px_rgba(45,212,191,0.5)]" />
               </div>
@@ -116,11 +150,17 @@ const Index = () => {
         {/* Queue Section */}
         <div className="mb-16 animate-slide-up">
           <Queue
-            tracks={mockupQueue}
-            currentTrackId="1"
+            tracks={queue.map(track => ({
+              id: track.id,
+              title: track.title,
+              artist: track.artist || "",
+              duration: track.duration?.toString() || "0:00",
+              thumbnail: track.thumbnail,
+            }))}
+            currentTrackId={currentTrack?.id}
             isAdmin={isAdmin}
-            onSkip={(trackId) => console.log("Skipping track:", trackId)}
-            onRemove={(trackId) => console.log("Removing track:", trackId)}
+            onSkip={handleSkip}
+            onRemove={handleRemove}
           />
         </div>
 
@@ -131,15 +171,15 @@ const Index = () => {
 
         {/* Player */}
         <MusicPlayer
-          groupId="example_group"
-          currentTrack={{
-            title: "Mockup Song 1",
-            artist: "Artist 1",
-            duration: 225,
-            thumbnail: "https://picsum.photos/400",
-          }}
-          isPlaying={isPlaying}
-          onPlayPause={() => setIsPlaying(!isPlaying)}
+          groupId={roomId}
+          currentTrack={currentTrack ? {
+            title: currentTrack.title,
+            artist: currentTrack.artist || "",
+            duration: currentTrack.duration || 0,
+            thumbnail: currentTrack.thumbnail,
+          } : undefined}
+          isPlaying={currentTrack?.is_playing || false}
+          onPlayPause={handlePlayPause}
           onNext={() => console.log("Next track")}
           onPrevious={() => console.log("Previous track")}
         />
