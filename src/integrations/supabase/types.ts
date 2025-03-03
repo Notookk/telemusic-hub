@@ -9,7 +9,118 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      current_track: {
+        Row: {
+          artist: string | null
+          duration: number
+          is_playing: boolean | null
+          requested_by: string | null
+          room_id: string
+          started_at: string | null
+          thumbnail: string | null
+          title: string
+          url: string
+        }
+        Insert: {
+          artist?: string | null
+          duration: number
+          is_playing?: boolean | null
+          requested_by?: string | null
+          room_id: string
+          started_at?: string | null
+          thumbnail?: string | null
+          title: string
+          url: string
+        }
+        Update: {
+          artist?: string | null
+          duration?: number
+          is_playing?: boolean | null
+          requested_by?: string | null
+          room_id?: string
+          started_at?: string | null
+          thumbnail?: string | null
+          title?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "current_track_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: true
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      queue: {
+        Row: {
+          artist: string | null
+          created_at: string
+          duration: number
+          id: string
+          position: number
+          requested_by: string | null
+          room_id: string | null
+          thumbnail: string | null
+          title: string
+          url: string
+        }
+        Insert: {
+          artist?: string | null
+          created_at?: string
+          duration: number
+          id?: string
+          position: number
+          requested_by?: string | null
+          room_id?: string | null
+          thumbnail?: string | null
+          title: string
+          url: string
+        }
+        Update: {
+          artist?: string | null
+          created_at?: string
+          duration?: number
+          id?: string
+          position?: number
+          requested_by?: string | null
+          room_id?: string | null
+          thumbnail?: string | null
+          title?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queue_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
